@@ -2,7 +2,7 @@
 
 This Simulation is the implementation for the paper **A Machine Learning-based Security Vulnerability Study on XOR PUFs for Resource-Constraint Internet of Things** [Here](https://ieeexplore.ieee.org/abstract/document/8473439). Please follow the following instructions to properly run the code on your machine. 
 
-**NOTE: Because the code was originally developed using an old version of scikit-learn 0.19 in 2018, it is not modified, commented, and tested to ensure compatibility with the current scikit-learn version 0.24.0. You might need to play with neural network parameters to achieve better results. If you find this code helpful in your research, please consider the citation stated at the end of this page**
+**NOTE: Because the code was originally developed using an old version of scikit-learn 0.19 in 2018, it is now modified, commented, and tested to ensure compatibility with the current scikit-learn version 0.24.0. You might need to play with neural network parameters to achieve better results. If you find this code helpful in your research, please consider the citation stated at the end of this page**
 
 
 ## Prerequisites
