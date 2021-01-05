@@ -299,7 +299,6 @@ def handle_test_chunk(COM, args, training_chunk, testing_chunk, gen, model, rank
             start_read_offset = 0
             num_to_read = (testing_chunk * (args.stages + 1)) * np.dtype(np.int8).itemsize
             C = utils.read_from_disk(test_path, start_read_offset, num_to_read, (args.stages + 1))
-            print(C)
             end = time.time()
 
             io_time = io_time + (end - start)
