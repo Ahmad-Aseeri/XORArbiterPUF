@@ -74,10 +74,7 @@ if __name__ == "__main__":
     output = None
     filename = None
 
-    if sys.platform != 'darwin':
-        path = '/home/ubuntu/Ahmad/data/'
-    else:
-        path = '/Users/Ahmad/Desktop/data/'
+    path = ''
 
     # Generate directories to hold results
     if rank is MASTER_CORE:
