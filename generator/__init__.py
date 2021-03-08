@@ -20,7 +20,7 @@ class PUFGenerator(object):
     def generate_challenges(self, num_challenges, rank):
         np.random.seed(random.randint(0, 2 ** 16) + rank)
         C = np.random.choice(np.array([0, 1], dtype=np.int8), size=(num_challenges, self.num_stages))
-        challenges = np.unique(C, axis=0)
+        challenges = np.unique(C, axis=0) if self.num_stages < 32 else C
 
         # challenges = [random.randint(0, 2 ** self.num_stages - 1) for _ in range(num_challenges)]
         #
