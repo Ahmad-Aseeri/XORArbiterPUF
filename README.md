@@ -7,16 +7,24 @@ This Simulation is the implementation for the paper **A Machine Learning-based S
 
 ## Prerequisites
 * Since the code is parallelized for the data generation (CRPs generation), ensure Open-MPI is installed on your laptop from here (https://www.open-mpi.org). 
+* This project can be run using Anaconda or pip.
 
+### Using Anaconda
 * Install anaconda 3 for python packages on your laptop. Ensure to make it your main python interpreter by typing in the terminal (which python).
 
 * After installing Anaconda 3, install the following packages: 
 
 	- install mpi4py from ( https://anaconda.org/anaconda/mpi4py )
 	- install term color from ( https://anaconda.org/omnia/termcolor )
+	- install pypuf from ( https://pypi.org/project/pypuf/ )
 
 * Navigate (sikit-learn/neural_network) directory in anaconda3. For instance, in Mac OSX it is usually located in this path ```/anaconda3/lib/python3.6/site-packages/sklearn/neural_network/```, and then replace ```_multilayer_perceptron.py``` with the modified one in this repository. If it will ask for your permission so accept and replace.
 
+### Using Pip
+* Clone this repository
+* Inside the repository, create a virtual environment using `python3 -m venv venv`
+* Activate it `source venv/bin/activate`
+* Install term color and pypuf `python3 -m pip install "pypuf>=0.0.9" termcolor scikit-learn boto3 mpi4py`
 
 ## How to run 
 
@@ -30,6 +38,9 @@ This Simulation is the implementation for the paper **A Machine Learning-based S
 
 * You can also state your neural network model parameters from command line: for instance if you want 3 hidden layers and minibatch= 1000, use --layers 3 --minibatch 1000. You can define your custom argument from ( get_args()) method in the main.py.
 
+* The tests can be run using pytest (install it using `python3 -m pip install pytest`)
+
+```python3 -m pytest```
 
 ## How to cite 
 ```

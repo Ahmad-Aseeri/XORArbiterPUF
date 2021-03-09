@@ -18,8 +18,6 @@ class XOR_PUF_MultilayerPerceptron(BaseEstimator, ClassifierMixin):
         self.num_streams = num_streams
         self.num_stages = num_stages
         self.batch_size = batch
-        self.weights = None
-        self.intercepts = None
         self.solver = solver
         self.n_layers = n_layers
 
@@ -54,8 +52,6 @@ class XOR_PUF_MultilayerPerceptron(BaseEstimator, ClassifierMixin):
                                        batch_size=self.batch_size,
                                        early_stopping=True,
                                        verbose=True,
-                                       weights=self.weights,
-                                       intercepts=self.intercepts
                                        )
         self.estimator.fit(C, r)
         return self
