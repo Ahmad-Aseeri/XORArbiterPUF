@@ -1,12 +1,9 @@
-import numpy as np
 import random
-from sklearn.model_selection import TimeSeriesSplit
-from sklearn.ensemble import IsolationForest
-from sklearn.neighbors import LocalOutlierFactor
-import scipy
-import itertools
-from mpi4py import MPI
-import sys
+
+import numpy as np
+
+import pypuf.io
+import pypuf.simulation.delay
 
 
 class PUFGenerator(object):
@@ -122,6 +119,39 @@ class LinearPUFGenerator(PUFGenerator):
         else:
             return 0
 
+    def simulate_challenges(self, challenges):
+        # shorthands
+        n = self.num_stages
+        dTT = self.puf_arbiter[:, 0]
+        dBB = self.puf_arbiter[:, 3]
+        dBT = self.puf_arbiter[:, 1]
+        dTB = self.puf_arbiter[:, 2]
+
+        # Compute weights and bias for evaluation using a linear threshold function.
+        # The formula used below can be obtained using an inductive proof over the
+        # number of stages in each Arbiter PUF.
+        weights = np.empty(shape=(n,))
+        weights[0] = .5 * (dTT[0] - dBB[0] - dBT[0] + dTB[0])
+        weights[0] *= 1
+        for i in range(1, n):
+            weights[i] = -.5 * (-1)**(i-n) * (
+                - dTT[i-1] + dTB[i-1] - dBT[i-1] + dBB[i-1]
+                - dTT[i] - dTB[i] + dBT[i] + dBB[i]
+            )
+        bias = .5 * (dTT[n-1] - dBB[n-1] + dBT[n-1] - dTB[n-1])
+
+        # use pypuf's LTF simulator to compute responses fast
+        simulator = pypuf.simulation.delay.LTFArray(
+            weight_array=weights.reshape((1, n)),
+            bias=bias,
+            transform=pypuf.simulation.delay.XORArbiterPUF.transform_atf,
+            combiner=pypuf.simulation.delay.LTFArray.combiner_xor,
+        )
+
+        # pypuf only understands challenges and responses in {-1,1} format,
+        # hence the conversion
+        return challenges, (simulator.eval(1 - 2 * challenges) == -1).astype(np.int8)
+
 
 """
 This class implements the XOR Arbiter PUF simulator. Each stream is generated
@@ -162,3 +192,24 @@ class XORPUFGenerator(PUFGenerator):
             return 1
         else:
             return 0
+
+    def simulate_challenges(self, challenges):
+        return challenges, (np.sum([p.simulate_challenges(challenges)[1] for p in self.linear_pufs], axis=0) % 2).astype(np.int8)
+
+
+def test_arbiter_puf_simulation():
+    """Tests if delay-based and pypuf-based simulation gives the same result in `LinearPUFGenerator`."""
+    puf = LinearPUFGenerator(64)
+    challenges = puf.generate_challenges(num_challenges=100, rank=0)
+    _, r1 = PUFGenerator.simulate_challenges(puf, challenges)
+    _, r2 = puf.simulate_challenges(challenges)
+    assert np.mean(r1 == r2) == 1
+
+
+def test_xor_arbiter_puf_simulation():
+    """Tests if delay-based and pypuf-based simulation gives the same result in `XORPUFGenerator`."""
+    puf = XORPUFGenerator(64, 3)
+    challenges = puf.generate_challenges(num_challenges=100, rank=0)
+    _, r1 = PUFGenerator.simulate_challenges(puf, challenges)
+    _, r2 = puf.simulate_challenges(challenges)
+    assert np.mean(r1 == r2) == 1

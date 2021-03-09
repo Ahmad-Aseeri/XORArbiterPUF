@@ -1,8 +1,13 @@
+from tempfile import NamedTemporaryFile
+
 import numpy as np
 import os, resource, math, multiprocessing, itertools, sys, random
 import boto.ec2
 import boto.utils
 import boto, boto3
+
+from generator import LinearPUFGenerator
+
 
 def data_generation(COM, num_challenges, gen, rank, num_processors):
     C, r = gen.generate(num_challenges, num_processors, rank)
@@ -191,3 +196,23 @@ def generate_noise(size, dim):
 #         proc.join()
 #
 #     return C
+
+
+def test_write_read():
+    """Make sure hard disk read/write operations do not change CRP data"""
+    n = 64
+    N = 13000
+    puf = LinearPUFGenerator(n)
+    C, r = puf.generate(N, 1, 0)
+
+    with NamedTemporaryFile() as f:
+        write_on_disk(f.name, np.hstack((C, r.reshape(-1, 1))), 0)
+        read_len = N * (n + 1) * np.dtype(np.int8).itemsize
+        disk_data = read_from_disk(f.name, 0, read_len, n + 1)
+    disk_r = disk_data[:, -1]
+    disk_C = np.delete(disk_data, -1, axis=1)
+
+    assert (disk_C == C).all()
+    assert (disk_r == r).all()
+    assert C.dtype == disk_C.dtype == np.int8
+    assert r.dtype == disk_r.dtype == np.int8
